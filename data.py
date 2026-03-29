@@ -68,3 +68,28 @@ def extract_profile(data: dict):
         return {
             "Error extracting profile" : str(e)
         }
+
+def build_final_data(ticker: str):
+    price_raw = get_stock_price(ticker)
+    profile_raw = get_company_profile(ticker)
+
+    price = extract_price(price_raw)
+    profile = extract_profile(profile_raw)
+
+    return {
+        "ticker": ticker.upper(),
+        "company": price.get("company"),
+        "price_data": price,
+        "profile_data": profile
+    }
+
+def prepare_for_ai(final: dict):
+    return {
+        "ticker": final["ticker"],
+        "company": final["company"],
+        "price": final["price_data"]["price"],
+        "change_pct": final["price_data"]["change_pct"],
+        "volume": final["price_data"]["volume"],
+        "sector": final["profile_data"]["sector"],
+        "industry": final["profile_data"]["industry"]
+    }
