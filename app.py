@@ -1,15 +1,29 @@
 import streamlit as st
-from data import get_stock_price, extract_price, get_company_profile, extract_profile
+from data import get_stock_price, extract_price, get_company_profile, extract_profile, build_final_data, prepare_for_ai
+from agent import analyze
 
 st.title("Simple stock checker")
 
 ticker = st.text_input("Enter ticker")
 if st.button("Get Price"):
-    raw = get_stock_price(ticker)
-    clean = extract_price(raw)
+    final = build_final_data(ticker)
 
-    profile_raw = get_company_profile(ticker)
-    profile = extract_profile(profile_raw)
+    price = final["price_data"]
+    profile = final["profile_data"]
+    ai_input = prepare_for_ai(final)
+
+    st.markdown("---")
+    st.subheader("AI Input (Cleaned)")
+    st.json(ai_input)
+
+    st.subheader(final["company"])
+
+    col1, col2, col3 = st.columns(3)
+
+    col1.metric("💰 Price", price["price"])
+    col2.metric("📉 Change", price["change"])
+    col3.metric("📊 Volume", price["volume"])
+
     st.markdown("---")
     st.subheader("Company Info")
 
@@ -19,13 +33,8 @@ if st.button("Get Price"):
     st.write(f"**Employees:** {profile['employees']}")
     st.write(f"**Website:** {profile['website']}")
 
-    if "error" in clean:
-        st.error(clean["error"])
-    else:
-        st.subheader(clean["company"])
+    report = analyze(ai_input)
 
-        col1, col2, col3 = st.columns(3)
-
-        col1.metric("💰 Price", clean["price"])
-        col2.metric("📉 Change", clean["change"])
-        col3.metric("📊 Volume", clean["volume"])
+    st.markdown("---")
+    st.subheader("AI Analysis")
+    st.write(report)
