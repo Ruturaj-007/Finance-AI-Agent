@@ -31,7 +31,7 @@ def extract_price(data: dict):
 
         return {
             "company" : body.get("companyName", "N/A"),
-            "price" : primary.get("astsalePrice", "N/A"),
+            "price" : primary.get("lastSalePrice", "N/A"),
             "change" : primary.get("netChange", "N/A"),
             "change_pct" : primary.get("percentageChange", "N/A"),
             "volume" : primary.get("volume", "N/A")
@@ -41,3 +41,30 @@ def extract_price(data: dict):
             "Error extracting price" : str(e)
         }
 
+def get_company_profile(ticker: str):
+    url = "https://yahoo-finance15.p.rapidapi.com/api/v1/markets/stock/modules"
+
+    params = {
+        "ticker" : ticker,
+        "module" : "asset-profile"
+    }
+
+    response = requests.get(url, headers=HEADERS, params=params)
+    return response.json()
+
+def extract_profile(data: dict):
+    try:
+        body = data.get("body", {})
+
+        return {
+            "sector" : body.get("sector", "N/A"),
+            "industry" : body.get("industry", "N/A"),
+            "country" : body.get("country", "N/A"),
+            "employees" : body.get("fullTimeEmployees", "N/A"),
+            "website" : body.get("website", "N/A") 
+        }
+    
+    except Exception as e:
+        return {
+            "Error extracting profile" : str(e)
+        }
